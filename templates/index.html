@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>LegalAI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
+                * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -415,6 +416,119 @@
             font-size: 0.9em;
         }
 
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            width: 100%;
+        }
+
+        #query {
+            flex: 1;
+        }
+
+        .upload-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            color: #6c757d;
+            font-size: 18px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            height: 40px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-bottom: 35px;
+        }
+
+        .upload-btn:hover:not(:disabled) {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #495057;
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Style cho file bubble giống ảnh */
+        .uploaded-file-bubble {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .file-bubble {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 8px 12px 8px 8px;
+            color: white;
+            font-size: 13px;
+            max-width: 250px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            gap: 8px;
+        }
+
+        .file-icon {
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .file-type {
+            font-size: 11px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             body {
@@ -438,7 +552,6 @@
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="sidebar">
@@ -504,9 +617,26 @@
             <div id="typing-indicator" class="typing"></div>
         </div>
 
+        <div id="uploaded-file" class="uploaded-file-bubble" style="display: none;">
+            <div class="file-bubble">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                    <div id="file-name" class="file-name"></div>
+                    <div class="file-type">PDF</div>
+                </div>
+                <button id="remove-file" class="close-btn" title="Xóa file">✕</button>
+            </div>
+        </div>
+
         <form id="input-form" onsubmit="sendQuery(); return false;">
-            <textarea id="query" placeholder="Nhập câu hỏi của bạn..." autofocus {% if no_conversations %}disabled{% endif %}></textarea>
-            <button type="submit" class="send-btn" {% if no_conversations %}disabled{% endif %}>🚀</button>
+            <div class="input-container">
+                <input type="file" id="pdf-upload" accept=".pdf" style="display: none;">
+                <button type="button" id="upload-btn" class="upload-btn" title="Upload file PDF" {% if no_conversations %}disabled{% endif %}>
+                    📎
+                </button>
+                <textarea id="query" placeholder="Nhập câu hỏi của bạn..." autofocus {% if no_conversations %}disabled{% endif %}></textarea>
+                <button type="submit" class="send-btn" {% if no_conversations %}disabled{% endif %}>🚀</button>
+            </div>
         </form>
     </div>
 
@@ -518,6 +648,8 @@
             breaks: true,
             sanitizer: true
         });
+
+        let currentFile = null;
 
         // Function để re-render tất cả assistant messages thành Markdown
         function renderAllMarkdown() {
@@ -532,7 +664,55 @@
         }
 
         // Chạy render sau khi page load và sau mỗi thay đổi
-        window.addEventListener('load', renderAllMarkdown);
+        window.addEventListener('load', function () {
+            renderAllMarkdown();
+            initFileUpload();
+        });
+
+        function initFileUpload() {
+            const uploadBtn = document.getElementById('upload-btn');
+            const pdfUpload = document.getElementById('pdf-upload');
+            const uploadedFile = document.getElementById('uploaded-file');
+            const removeFile = document.getElementById('remove-file');
+            const fileName =  document.getElementById('file-name');
+
+            if (!uploadBtn || !pdfUpload) return;
+
+            uploadBtn.addEventListener('click', () => {
+                pdfUpload.click();
+            });
+
+            pdfUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    currentFile = file;
+                    fileName.textContent = file.name;
+                    uploadedFile.style.display = 'flex';
+                    console.log('PDF Uploaded:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2) + ' MB');
+                } else if (file) {
+                    alert("Please upload a PDF file!");
+                    pdfUpload.value = '';
+                }
+            })
+
+            removeFile.addEventListener('click', () => {
+                currentFile = null;
+                fileName.textContent = '';
+                uploadedFile.style.display = 'none';
+            })
+        }
+
+        function clearCurrentFile() {
+            currentFile = null;
+            const uploadedFile = document.getElementById('uploaded-file');
+            const pdfUpload = document.getElementById('pdf-upload');
+            if (uploadedFile) {
+                uploadedFile.style.display = 'none';
+            }
+            if (pdfUpload) {
+                pdfUpload.value = '';
+            }
+        }
 
         function sendQuery() {
             const queryInput = document.getElementById('query');
@@ -542,7 +722,13 @@
             const history = document.getElementById('history');
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
-            userMsg.textContent = query;
+
+            let userContent = query;
+            if (currentFile) {
+                userContent += ` 📎 ${currentFile.name}`;
+            }
+            userMsg.textContent = userContent;
+
             history.insertBefore(userMsg, document.getElementById('typing-indicator'));
             history.scrollTop = history.scrollHeight;
 
@@ -550,10 +736,15 @@
             typing.style.display = 'block';
             history.scrollTop = history.scrollHeight;
 
+            const formData = new FormData();
+            formData.append('query', query);
+            if (currentFile) {
+                formData.append('pdf', currentFile);
+            }
+
             fetch('/query', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: query })
+                body: formData,
             })
             .then(response => response.json())
             .then(data => {
@@ -565,11 +756,11 @@
                 const assistantMsg = document.createElement('div');
                 assistantMsg.className = 'message assistant';
                 assistantMsg.innerHTML =
-            '<span class="raw-md" style="display:none">' + data.response + '</span>' +
-            '<div class="md-render"></div>' +
-            `<div class="message-metadata">
-                <small>🤖 Model: <strong>${data.model}</strong> | ⏱️ Thời gian: <strong>${data.elapsed_time}s</strong></small>
-            </div>`;
+                    '<span class="raw-md" style="display:none">' + data.response + '</span>' +
+                    '<div class="md-render"></div>' +
+                    `<div class="message-metadata">
+                        <small>🤖 Model: <strong>${data.model}</strong> | ⏱️ Thời gian: <strong>${data.elapsed_time}s</strong></small>
+                    </div>`;
                 history.insertBefore(assistantMsg, typing);
                 renderAllMarkdown();
                 history.scrollTop = history.scrollHeight;
@@ -588,6 +779,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    clearCurrentFile();
                     location.reload();
                 }
             });
@@ -598,6 +790,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    clearCurrentFile();
                     const history = document.getElementById('history');
                     history.innerHTML = '<div id="typing-indicator" class="typing"></div>';
                     data.messages.forEach(msg => {
@@ -623,6 +816,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        clearCurrentFile();
                         location.reload();
                     }
                 });
