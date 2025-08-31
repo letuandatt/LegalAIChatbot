@@ -1,6 +1,6 @@
 # 📚 LegalAIChatbot
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/) 
+[![Python](https://img.shields.io/badge/Python-3.12.6-blue.svg)](https://www.python.org/downloads/release/python-3126/)
 [![Flask](https://img.shields.io/badge/Flask-3.1.2-green.svg)](https://flask.palletsprojects.com/) 
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.x-orange.svg)](https://www.langchain.com/) 
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](LICENSE)
