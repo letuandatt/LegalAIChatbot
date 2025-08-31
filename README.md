@@ -9,6 +9,14 @@
 
 ---
 
+## 🖼️ Giao diện hệ thống
+
+<p align="center">
+  <img src="assests/system_interface.png" alt="LegalAIChatbot UI" width="600"/>
+</p>
+
+---
+
 ## 🚀 Tính năng nổi bật
 
 - **Upload PDF**: Hỗ trợ trích xuất metadata tự động (ngày ban hành, người ký, số hiệu, …).
