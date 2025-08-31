@@ -5,8 +5,9 @@
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.x-orange.svg)](https://www.langchain.com/) 
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](LICENSE)
 
-**LegalAIChatbot** là một hệ thống hỏi – đáp văn bản pháp luật tiếng Việt dựa trên phương pháp **Retrieval-Augmented Generation (RAG)**. Người dùng có thể tải lên file PDF (văn bản pháp luật) và hệ thống sẽ trích xuất metadata, lưu tài liệu dưới dạng embeddings, hoặc truy vấn trực tiếp vào kho tri thức của hệ thống, rồi trả lời câu hỏi một cách chính xác và có trích dẫn.
-
+> 💡 **LegalAIChatbot** là một hệ thống hỏi – đáp văn bản pháp luật tiếng Việt dựa trên phương pháp **Retrieval-Augmented Generation (RAG)**.  
+📂 Người dùng có thể tải lên file **PDF** (văn bản pháp luật), hệ thống sẽ tự động **trích xuất metadata**, lưu tài liệu dưới dạng **embeddings**, hoặc **truy vấn trực tiếp vào kho tri thức** của hệ thống.  
+✅ Kết quả: câu trả lời **chính xác, có trích dẫn rõ ràng** từ văn bản gốc.
 ---
 
 ## 🖼️ Giao diện hệ thống
